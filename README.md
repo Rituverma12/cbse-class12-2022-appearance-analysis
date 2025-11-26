@@ -37,6 +37,7 @@ The goal is to build a transparent, annotated dashboard and dataset pipeline tha
   - Copied the result sheet 'class12-2022 result' into a new sheet named 'fact_table'.
   - Added column Base Status, formula = IF([@Registered] = 0, "ABSENT", "NON_ZERO")
   - Added column Base Flag, formula = IF([@[Registered]] = 0, "ABSENT_BASE", IF([@[Registered]]<100, "SMALL_BASE", "VALID_BASE"))
+  - Added column Anomaly Flag, formula = =IF([@Registered]=0, "ABSENT", IF([@[Appearance Rate]]<0.98, "LOW_RATE", IF(AND([@[Appearance Rate]]=1, [@Registered]<100), "SUSPICIOUS_PERFECTION", "NORMAL")))
 
 - Pivot Table Setup
 
@@ -50,9 +51,9 @@ The goal is to build a transparent, annotated dashboard and dataset pipeline tha
   - Filter: Base Status -> Dropped-down arrow -> Select only "NON-ZERO" to exclude ABSENT status.
   - Slicer: Added for School Type to allow interactive exploration of patterns within each category. For example, CTSA and GOVT AIDED often show small bases, while KV and INDEPENDENT operate at large bases. 
 
-- "profiling" sheet setup
+- "profiling_baseflag" sheet 
 
-  The profiling sheet was created to support the credibility of setting up small base later. It specifically analyzes the distribution of registered counts across different threshold. 
+  The profiling sheet was created to support the credibility of setting up small base later. To determine the size of the base, so that denominator is large enough to be statistically stable. It specifically analyzes the distribution of registered counts across different threshold. 
 
   The table below summarizes key metrics: 
     Smallest non-zero base	22
@@ -72,18 +73,75 @@ The goal is to build a transparent, annotated dashboard and dataset pipeline tha
     - Count below 100 = COUNTIFS(fact_table!E:E, "<100", fact_table!E:E, ">0")
     - Count below 1000 = COUNTIFS(fact_table!E:E, "<1000", fact_table!E:E, ">0")
 
-    These result shows that data is heavily skewed toward large operating bases. Only 9 out of 97 rows fall below 100, while the 25th percentile is 1385.75 and the median is 4067.5. Based on this, a conservative threshold was setup at 100, so that Base Flag statistically flags fragile rows without compromising overall coverage.
+  These result shows that data is heavily skewed toward large operating bases. Only 9 out of 97 rows(including 0 registered) fall below 100, while the 25th percentile is 1385.75 and the median is 4067.5. Based on this, a conservative threshold was setup at 100, so that Base Flag statistically flags fragile rows without compromising overall coverage.
+
+- "profiling_anomalyflag" sheet 
+  This profiling sheet was created to support the credibility of setting up anomaly detection later. To determine the behavior of appearance rates, so that the reported percentages are trustworthy and not misleading. It specifically analyzes the distribution of appearance rate across different thresholds.
+
+  The table below summarizes key matrices:
+  Smallest non-zero rate:	0.952095808
+  25th percentile:	0.993447241
+  Median: 	0.997006237
+  Count below 90%:	0
+  Count below 95%:	0
+  Count below 96%:	1
+  Count below 98%:	2
+  Count below 98.5%:	3
+  Count below 98.6%:	3
+  Count below 98.7%:	4
+  Count below 98.8%:	7
+  Count below 98.9%:	9
+  Count below 99%:	11
+  Blank fields:	22
+  Non-empty rows:	74
+  Total Counts: 	96
+
+  This diagonistic step ensures that the anomaly flag is based on real data patterns rather than assumptions. Hence, set up a threshold for "LOW_RATE" classification.
+
+  Formulas used above:
+  - Smallest non-zero rate = MINIFS(Table1_14[Appearance Rate], Table1_14[Registered], ">0")
+  - 25th percentile = PERCENTILE.INC(FILTER(Table1_14[Appearance Rate], Table1_14[Registered]>0), 0.25)
+  - Median = MEDIAN(FILTER(Table1_14[Appearance Rate], Table1_14[Registered]>0))
+  - Count below 90%	= COUNTIFS(Table1_14[Appearance Rate], "<0.90")
+  - Count below 95%	= COUNTIFS(Table1_14[Appearance Rate], "<0.95")
+  - Count below 96%	= COUNTIFS(Table1_14[Appearance Rate], "<0.96")
+  - Count below 98%	= COUNTIFS(Table1_14[Appearance Rate], "<0.98")
+  - Count below 98.5%	= COUNTIFS(Table1_14[Appearance Rate], "<0.985")
+  - Count below 98.6%	= COUNTIFS(Table1_14[Appearance Rate], "<0.986")
+  - Count below 98.7%	= COUNTIFS(Table1_14[Appearance Rate], "<0.987")
+  - Count below 98.8%	= COUNTIFS(Table1_14[Appearance Rate], "<0.988")
+  - Count below 98.9%	= COUNTIFS(Table1_14[Appearance Rate], "<0.989")
+  - Count below 99%	= COUNTIFS(Table1_14[Appearance Rate], "<0.99")
+  - Blank fields = COUNTBLANK(Table1_14[Appearance Rate])
+  - Non-empty rows = COUNT(Table1_14[Appearance Rate])
+  - Total Counts = Blank fields + Non-empty rows
+
+  These results show that appearance rates are tightly clustered near perfection. Out of 74 non-empty rows, none fall below 95%, only 2 fall below 98%, and the 25th percentile is 99.34% with a median of 99.70%. Based on this, a conservative threshold was set at 98%, so that Anomaly Flag behaviorally flags rare underperformers without diluting overall credibility.
 
 ### Data Quality Checks
 
 - Absence Flag: Present in dataset (school type not offered in some regions, for example, CTSA has quite a few absence flags).
+
 - Error Flag: Implemented, but no cases found in this dataset. (dataset consistent).
+
 - Missing Flag: Implemented, but no cases found in this dataset. (dataset complete).
+
 - Failure Flag: Implemented, but no cases found (no region had registered students with zero appearance, at least ensuring strong monitoring and accountability across region and school type).
+
 - Base Status: Computed in the table. (Flags whether a row has any registered students or not. It includes the Absence and Error Flag case. It simplifies filtering and profiling.)  Used in pivot to exclude absence rows.
+
 - Pivot Filtering: Excluded "ABSENCE" base status to ensure threshold analysis. 
-- Base Flag: Identifies fragile or unstable appearance rates. Used for statistical stability and credibility. 
+
+- Base Flag: Identifies fragile or unstable appearance rates. Used for statistical stability and credibility. The Registered field is your denominator.
     "ABSENCE_BASE": No base
     "SMALL_BASE": Unstable rates due to small denominators
     "VALID_BASE": statistically stable rates
 - We used Base Status for filtering and Base Flag for analytical annotation. 
+Mainly, Base Flag is used to protect against fragile denominators. For example, in a school type with only 10 registered students, even a single absence causes a big swing in appearance rate. So, base flag protects against these exaggerated fluctuations. Setting the threshold for small base at 100 registered students, anything below it will be marked as unstable. 
+
+- Anomaly Flag: Identifies behavioral credibility issues. Even if the base is large, the appearance rates may be unusually low or suspiciously perfect for small bases. So, these flags mark rare behaviors.
+    "ABSENT": Zero registered
+    "LOW_RATE": Rare Underperformers
+    "SUSPICIOUS_PERFECTION": Perfect but fragile
+    "NORMAL": Valid or stable rates.
+Mainly, Anomaly Flag is used to protect against misleading appearance rates. For example, even if a school type has thousands of registered students, the appearance rate may be unusually low compared to the overall distribution, or for small number of registered students, the appearance rate may appear perfect. These behavior may mislead analysis, so labeling them clearly can increase the credibility.
