@@ -37,7 +37,8 @@ The goal is to build a transparent, annotated dashboard and dataset pipeline tha
   - Copied the result sheet 'class12-2022 result' into a new sheet named 'fact_table'.
   - Added column Base Status, formula = IF([@Registered] = 0, "ABSENT", "NON_ZERO")
   - Added column Base Flag, formula = IF([@[Registered]] = 0, "ABSENT_BASE", IF([@[Registered]]<100, "SMALL_BASE", "VALID_BASE"))
-  - Added column Anomaly Flag, formula = =IF([@Registered]=0, "ABSENT", IF([@[Appearance Rate]]<0.98, "LOW_RATE", IF(AND([@[Appearance Rate]]=1, [@Registered]<100), "SUSPICIOUS_PERFECTION", "NORMAL")))
+  - Added column Anomaly Flag, formula = IF([@Registered]=0, "ABSENT", IF([@[Appearance Rate]]<0.98, "LOW_RATE", IF(AND([@[Appearance Rate]]=1, [@Registered]<100), "SUSPICIOUS_PERFECTION", "NORMAL")))
+  - Added column Coverage Share, formula = [@Registered]/SUM([Registered])
 
 - Pivot Table Setup
 
@@ -117,6 +118,38 @@ The goal is to build a transparent, annotated dashboard and dataset pipeline tha
   - Total Counts = Blank fields + Non-empty rows
 
   These results show that appearance rates are tightly clustered near perfection. Out of 74 non-empty rows, none fall below 95%, only 2 fall below 98%, and the 25th percentile is 99.34% with a median of 99.70%. Based on this, a conservative threshold was set at 98%, so that Anomaly Flag behaviorally flags rare underperformers without diluting overall credibility.
+
+- "profiling_volatility_schooltype Pivot table
+
+  A pivot table named 'volatility_pivot' was created from the 'fact_table' to profile the behavioral consistency of appearance across school types. This profiling was necessary because even when bases are large, appearance rates can fluctuate across regions, and such volatility affects credibility. Stable school types provide consistent evidence of performance. 
+
+  - Create a pivot table from fact_table.
+  - Rows: School Type
+  - Values: Appearance Rate -> Value Field Settings -> Summarize by Max (Max_AppearanceRate)
+    Appearance Rate -> Value Field Settings -> Summarize by Min (Min_AppearanceRate)
+  - Helper Column: Outside the pivot, compute Volatility_Range_SchoolType = Max_AppearanceRate - Min_AppearanceRate
+
+  Standard Deviation measures how spread out values are from their average. For example, each school types appear in multiple regions. The pivot aggregates all those rows and computes SD of appearance rates across all regions. It's good in detecting behavioral consistency. 
+
+  Range detacts extremes across regions. Higher range value indicates that school type has inconsistent behavior across regions. Low range indicates that school type is uniformly performing.
+
+  Interpretation:
+  - KV shows the most stable behavior (lowest StdDev and Range)
+  - GOVT shows the most volatile behavior (highest StdDev and Range)
+  - INDEPENDENT and GOVT AIDED shows moderate stability.
+  - JNV is less consistent than INDEPENDENT and GOVT AIDED but more stable than CTSA and GOVT.
+  - CTSA is slightly better than GOVT.
+
+- "Charts_volatility" sheet
+
+  Two visualizations were created using data from the profiling_volatility_schooltype pivot table:
+
+  1. Clustered Column Chart
+  A clustered column chart was created to compare StdDev and Range side by side for each school type, highlighting which school types are behaviorally consistent (low StdDev) and which show wide performance swings (high Range). From the chart we can see, KV schools show the lowest volatility across both metrics, while GOVT schools show the highest.
+
+  2. Dual Axis Chart
+  A dual axis chart was created to plot Volatility_StdDev_SchoolType as bars and Volatility_Range_SchoolType as a line on a secondary axis. The chart highlights a clear view of consistency (StdDev) versus extremes (Range) in one visual. It is useful for identifying school types that are tightly clustered but still have outlier regions.
+
 
 ### Data Quality Checks
 
