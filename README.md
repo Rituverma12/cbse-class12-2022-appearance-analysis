@@ -57,9 +57,9 @@ The goal is to build a transparent, annotated dashboard and dataset pipeline tha
       ```powerquery
       = if [Registered] > 0 and [Appeared] = 0 then "FAIL" else null
 
-    - Removed: Error Flag, Missing Flag, and Failure Flag. Since no cases were found in the dataset.
+  - Removed: Error Flag, Missing Flag, and Failure Flag. Since no cases were found in the dataset.
 
-    - Cleaned query output is renamed 'class12-2022 result' worksheet in Excel.
+  - Cleaned query output is renamed 'class12-2022 result' worksheet in Excel.
 
 - **Fact Table Preparation**
 
@@ -119,13 +119,16 @@ The goal is to build a transparent, annotated dashboard and dataset pipeline tha
   The profiling sheet was created to support the credibility of setting up small base later. To determine the size of the base, so that denominator is large enough to be statistically stable. It specifically analyzes the distribution of registered counts across different threshold.
 
   The table below summarizes key metrics:
-    Smallest non-zero base 22
-    25th percentile (non-zero) 1385.75
-    Median (non-zero) 4067.5
-    Count below 30 1
-    Count below 50 2
-    Count below 100 9
-    Count below 1000 16
+
+    | Metric                   | Value          |
+    | -------------------------|----------------|
+    |Smallest non-zero base    | 22             |
+    |25th percentile (non-zero)| 1385.75        |
+    |Median (non-zero)         | 4067.5         |
+    |Count below 30            | 1              |
+    |Count below 50            | 2              |
+    |Count below 100           | 9              |
+    |Count below 1000          | 16             |
 
   Formulas used above:
 
@@ -171,22 +174,25 @@ The goal is to build a transparent, annotated dashboard and dataset pipeline tha
   This profiling sheet was created to support the credibility of setting up anomaly detection later. To determine the behavior of appearance rates, so that the reported percentages are trustworthy and not misleading. It specifically analyzes the distribution of appearance rate across different thresholds.
 
   The table below summarizes key matrices:
-  Smallest non-zero rate: 0.952095808
-  25th percentile: 0.993447241
-  Median:  0.997006237
-  Count below 90%: 0
-  Count below 95%: 0
-  Count below 96%: 1
-  Count below 98%: 2
-  Count below 98.5%: 3
-  Count below 98.6%: 3
-  Count below 98.7%: 4
-  Count below 98.8%: 7
-  Count below 98.9%: 9
-  Count below 99%: 11
-  Blank fields: 22
-  Non-empty rows: 74
-  Total Counts:  96
+
+  | Metric                 | Value          |
+  | -----------------------|----------------|
+  |Smallest non-zero rate  | 0.952095808    |
+  |25th percentile         | 0.993447241    |
+  |Median                  | 0.997006237    |
+  |Count below 90%         | 0              |
+  |Count below 95%         | 0              |
+  |Count below 96%         | 1              |
+  |Count below 98%         | 2              |
+  |Count below 98.5%       | 3              |
+  |Count below 98.6%       | 3              |
+  |Count below 98.7%       | 4              |
+  |Count below 98.8%       | 7              |
+  |Count below 98.9%       | 9              |
+  |Count below 99%         | 11             |
+  |Blank fields            | 22             |
+  |Non-empty rows          | 74             |
+  |Total Counts            | 96             |
 
   This diagonistic step ensures that the anomaly flag is based on real data patterns rather than assumptions. Hence, set up a threshold for "LOW_RATE" classification.
 
@@ -284,10 +290,10 @@ The goal is to build a transparent, annotated dashboard and dataset pipeline tha
       Appearance Rate -> Value Field Settings -> Summarize by Min (Min_AppearanceRate)
   - Helper Column: Outside the pivot, compute:
   
-  Volatility_Range_SchoolType
+    Volatility_Range_SchoolType
   
-    ```excel
-    = Max_AppearanceRate - Min_AppearanceRate
+      ```excel
+      = Max_AppearanceRate - Min_AppearanceRate
 
   Standard Deviation measures how spread out values are from their average. For example, each school types appear in multiple regions. The pivot aggregates all those rows and computes SD of appearance rates across all regions. It's good in detecting behavioral consistency.
 
@@ -347,7 +353,7 @@ The goal is to build a transparent, annotated dashboard and dataset pipeline tha
     Mainly, Anomaly Flag is used to protect against misleading appearance rates. For example, even if a school type has thousands of registered students, the appearance rate may be unusually low compared to the overall distribution, or for small number of registered students, the appearance rate may appear perfect. These behavior may mislead analysis, so labeling them clearly can increase the credibility.
   
   9. Integrity Checks: To ensure most basic and logical consistency of dataset, three diagnostics columns were added to the fact_table:
-  
+
       Integrity_RateCheck: Flags appearance rates outside the logical range (0-1).
 
       Integrity_RegisteredCheck: Flags cases where appeared students > registered students.
