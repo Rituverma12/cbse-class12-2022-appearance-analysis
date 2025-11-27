@@ -144,10 +144,10 @@ The goal is to build a transparent, annotated dashboard and dataset pipeline tha
 
   Two visualizations were created using data from the profiling_volatility_schooltype pivot table:
 
-  1. Clustered Column Chart
+  1. Clustered Column Chart: [Volatility Column Chart](images/Volatility%20Index%20by%20School%20Type.png)
   A clustered column chart was created to compare StdDev and Range side by side for each school type, highlighting which school types are behaviorally consistent (low StdDev) and which show wide performance swings (high Range). From the chart we can see, KV schools show the lowest volatility across both metrics, while GOVT schools show the highest.
 
-  2. Dual Axis Chart
+  2. Dual Axis Chart: [Volatility Dual Axis Chart](images/Volatility%20Index%20by%20School%20Type(Dual%20Axis).png)
   A dual axis chart was created to plot Volatility_StdDev_SchoolType as bars and Volatility_Range_SchoolType as a line on a secondary axis. The chart highlights a clear view of consistency (StdDev) versus extremes (Range) in one visual. It is useful for identifying school types that are tightly clustered but still have outlier regions.
 
 
