@@ -79,6 +79,7 @@ The goal is to build a transparent, annotated dashboard and dataset pipeline tha
   These result shows that data is heavily skewed toward large operating bases. Only 9 out of 97 rows(including 0 registered) fall below 100, while the 25th percentile is 1385.75 and the median is 4067.5. Based on this, a conservative threshold was setup at 100, so that Base Flag statistically flags fragile rows without compromising overall coverage.
 
 - **"profiling_anomalyflag" sheet**
+
   This profiling sheet was created to support the credibility of setting up anomaly detection later. To determine the behavior of appearance rates, so that the reported percentages are trustworthy and not misleading. It specifically analyzes the distribution of appearance rate across different thresholds.
 
   The table below summarizes key matrices:
@@ -149,36 +150,46 @@ The goal is to build a transparent, annotated dashboard and dataset pipeline tha
 
   - Clustered Column Chart: [Volatility Column Chart](images/Volatility%20Index%20by%20School%20Type.png)
 
-  A clustered column chart was created to compare StdDev and Range side by side for each school type, highlighting which school types are behaviorally consistent (low StdDev) and which show wide performance swings (high Range). From the chart we can see, KV schools show the lowest volatility across both metrics, while GOVT schools show the highest.
+    A clustered column chart was created to compare StdDev and Range side by side for each school type, highlighting which school types are behaviorally consistent (low StdDev) and which show wide performance swings (high Range). From the chart we can see, KV schools show the lowest volatility across both metrics, while GOVT schools show the highest.
 
   - Dual Axis Chart: [Volatility Dual Axis Chart](images/Volatility%20Index%20by%20School%20Type(Dual%20Axis).png)
 
-  A dual axis chart was created to plot Volatility_StdDev_SchoolType as bars and Volatility_Range_SchoolType as a line on a secondary axis. The chart highlights a clear view of consistency (StdDev) versus extremes (Range) in one visual. It is useful for identifying school types that are tightly clustered but still have outlier regions.
+    A dual axis chart was created to plot Volatility_StdDev_SchoolType as bars and Volatility_Range_SchoolType as a line on a secondary axis. The chart highlights a clear view of consistency (StdDev) versus extremes (Range) in one visual. It is useful for identifying school types that are tightly clustered but still have outlier regions.
 
 ### Data Quality Checks
 
-1. Absence Flag: Present in dataset (school type not offered in some regions, for example, CTSA has quite a few absence flags).
+  1. Absence Flag: Present in dataset (school type not offered in some regions, for example, CTSA has quite a few absence flags).
 
-2. Error Flag: Implemented, but no cases found in this dataset. (dataset consistent).
+  2. Error Flag: Implemented, but no cases found in this dataset. (dataset consistent).
 
-3. Missing Flag: Implemented, but no cases found in this dataset. (dataset complete).
+  3. Missing Flag: Implemented, but no cases found in this dataset. (dataset complete).
 
-4. Failure Flag: Implemented, but no cases found (no region had registered students with zero appearance, at least ensuring strong monitoring and accountability across region and school type).
+  4. Failure Flag: Implemented, but no cases found (no region had registered students with zero appearance, at least ensuring strong monitoring and accountability across region and school type).
 
-5. Base Status: Computed in the table. (Flags whether a row has any registered students or not. It includes the Absence and Error Flag case. It simplifies filtering and profiling.)  Used in pivot to exclude absence rows.
+  5. Base Status: Computed in the table. (Flags whether a row has any registered students or not. It includes the Absence and Error Flag case. It simplifies filtering and profiling.)  Used in pivot to exclude absence rows.
 
-6. Pivot Filtering: Excluded "ABSENCE" base status to ensure threshold analysis.
+  6. Pivot Filtering: Excluded "ABSENCE" base status to ensure threshold analysis.
 
-7. Base Flag: Identifies fragile or unstable appearance rates. Used for statistical stability and credibility. The Registered field is your denominator.
-    "ABSENCE_BASE": No base
-    "SMALL_BASE": Unstable rates due to small denominators
-    "VALID_BASE": statistically stable rates
-  We used Base Status for filtering and Base Flag for analytical annotation.
-  Mainly, Base Flag is used to protect against fragile denominators. For example, in a school type with only 10 registered students, even a single absence causes a big swing in appearance rate. So, base flag protects against these exaggerated fluctuations. Setting the threshold for small base at 100 registered students, anything below it will be marked as unstable.
+  7. Base Flag: Identifies fragile or unstable appearance rates. Used for statistical stability and credibility. The Registered field is your denominator.
 
-8. Anomaly Flag: Identifies behavioral credibility issues. Even if the base is large, the appearance rates may be unusually low or suspiciously perfect for small bases. So, these flags mark rare behaviors.
-    "ABSENT": Zero registered
-    "LOW_RATE": Rare Underperformers
-    "SUSPICIOUS_PERFECTION": Perfect but fragile
-    "NORMAL": Valid or stable rates.
-  Mainly, Anomaly Flag is used to protect against misleading appearance rates. For example, even if a school type has thousands of registered students, the appearance rate may be unusually low compared to the overall distribution, or for small number of registered students, the appearance rate may appear perfect. These behavior may mislead analysis, so labeling them clearly can increase the credibility.
+      "ABSENCE_BASE": No base
+
+      "SMALL_BASE": Unstable rates due to small denominators
+
+      "VALID_BASE": statistically stable rates
+
+    We used Base Status for filtering and Base Flag for analytical annotation.
+
+    Mainly, Base Flag is used to protect against fragile denominators. For example, in a school type with only 10 registered students, even a single absence causes a big swing in appearance rate. So, base flag protects against these exaggerated fluctuations. Setting the threshold for small base at 100 registered students, anything below it will be marked as unstable.
+
+  8. Anomaly Flag: Identifies behavioral credibility issues. Even if the base is large, the appearance rates may be unusually low or suspiciously perfect for small bases. So, these flags mark rare behaviors.
+
+      "ABSENT": Zero registered
+
+      "LOW_RATE": Rare Underperformers
+
+      "SUSPICIOUS_PERFECTION": Perfect but fragile
+
+      "NORMAL": Valid or stable rates.
+      
+    Mainly, Anomaly Flag is used to protect against misleading appearance rates. For example, even if a school type has thousands of registered students, the appearance rate may be unusually low compared to the overall distribution, or for small number of registered students, the appearance rate may appear perfect. These behavior may mislead analysis, so labeling them clearly can increase the credibility.
