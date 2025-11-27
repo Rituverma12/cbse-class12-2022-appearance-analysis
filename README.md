@@ -23,23 +23,84 @@ The goal is to build a transparent, annotated dashboard and dataset pipeline tha
   - Unpivoted School Types from CTSA to KV, resulting in 'Attribute' and 'Value' columns.
   - Renamed 'Attribute' column to 'School Type'
   - Pivoted 'Status' into 'Regd.' and 'Appd.' columns.
-  - Added computed column: Appearance Rate = if [#"Regd."] > 0 then [#"Appd."]/[#"Regd."] else null
-  - Renamed 'Regd.' and 'Appd.' to 'Registered' and 'Appeared'
-  - Added computed column: No-show Rate = if [Registered] > 0 then 1 - ([Appeared] / [Registered]) else null
-  - Added computed column: Absence Flag = if [Registered] = 0 and [Appeared] = 0 then "ABSENT" else null
-  - Added computed column: Error Flag = if [Registered] = 0 and [Appeared] > 0 then "DATA_ERROR" else null
-  - Added computed column: Missing Flag = if [Registered] = null or [Appeared] = null then "MISSING" else null
-  - Added computed column: Failure Flag = if [Registered] > 0 and [Appeared] = 0 then "FAIL" else null
-  - Removed: Error Flag, Missing Flag, and Failure Flag. Since no cases were found in the dataset.
-  - Cleaned query output is renamed 'class12-2022 result' worksheet in Excel.
+  - Added computed column:
+
+    - **Appearance Rate**
+
+      ```powerquery
+      = if [#"Regd."] > 0 then [#"Appd."]/[#"Regd."] else null
+
+      Renamed 'Regd.' and 'Appd.' to 'Registered' and 'Appeared'
+
+    - **No-show Rate**
+
+      ```powerquery
+      = if [Registered] > 0 then 1 - ([Appeared] / [Registered]) else null
+
+    - **Absence Flag**
+
+      ```powerquery
+      = if [Registered] = 0 and [Appeared] = 0 then "ABSENT" else null
+      
+    - **Error Flag**
+
+      ```powerquery
+      = if [Registered] = 0 and [Appeared] > 0 then "DATA_ERROR" else null
+
+    - **Missing Flag**
+  
+      ```powerquery
+      = if [Registered] = null or [Appeared] = null then "MISSING" else null
+      
+    - **Failure Flag**
+
+      ```powerquery
+      = if [Registered] > 0 and [Appeared] = 0 then "FAIL" else null
+
+    - Removed: Error Flag, Missing Flag, and Failure Flag. Since no cases were found in the dataset.
+
+    - Cleaned query output is renamed 'class12-2022 result' worksheet in Excel.
 
 - **Fact Table Preparation**
 
   - Copied the result sheet 'class12-2022 result' into a new sheet named 'fact_table'.
-  - Added column Base Status, formula = IF([@Registered] = 0, "ABSENT", "NON_ZERO")
-  - Added column Base Flag, formula = IF([@[Registered]] = 0, "ABSENT_BASE", IF([@[Registered]]<100, "SMALL_BASE", "VALID_BASE"))
-  - Added column Anomaly Flag, formula = IF([@Registered]=0, "ABSENT", IF([@[Appearance Rate]]<0.98, "LOW_RATE", IF(AND([@[Appearance Rate]]=1, [@Registered]<100), "SUSPICIOUS_PERFECTION", "NORMAL")))
-  - Added column Coverage Share, formula = [@Registered]/SUM([Registered])
+  
+  - Added diagnostic columns:
+
+    - **Base Status**
+
+      ```excel
+      = IF([@Registered] = 0, "ABSENT", "NON_ZERO")
+
+    - **Base Flag**
+
+      ```excel
+      = IF([@[Registered]] = 0, "ABSENT_BASE", IF([@[Registered]]<100, "SMALL_BASE", "VALID_BASE"))
+
+    - **Anomaly Flag**
+
+      ```excel
+      = IF([@Registered]=0, "ABSENT", IF([@[Appearance Rate]]<0.98, "LOW_RATE", IF(AND([@[Appearance Rate]]=1, [@Registered]<100), "SUSPICIOUS_PERFECTION", "NORMAL")))
+
+    - **Coverage Share**
+
+      ```excel
+      = [@Registered]/SUM([Registered])
+
+    - **Integrity_RateCheck**
+
+      ```excel
+      = IF(OR([@[Appearance Rate]]<0, [@[Appearance Rate]]>1), "FLAG", "OK")
+
+    - **Integrity_RegisteredCheck**
+
+      ```excel
+      = IF([@Appeared]>[@Registered], "FLAG", "OK")
+
+    - **Integrity_MissingCheck**
+
+      ```excel
+      = IF(OR(ISBLANK([@Registered]), ISBLANK([@Appeared]), [@Registered]=0, [@Appeared]=0), "FLAG", "OK")
 
 - **Pivot Table Setup**
 
@@ -68,13 +129,40 @@ The goal is to build a transparent, annotated dashboard and dataset pipeline tha
 
   Formulas used above:
 
-  - Smallest non -zero base = MINIFS(fact_table!E:E, fact_table!E:E, ">0")
-  - 25th percentile (non-zero) = PERCENTILE.INC(FILTER(fact_table!E:E, fact_table!E:E > 0), 0.25)
-  - Median (non-zero) = MEDIAN(FILTER(fact_table!E:E, fact_table!E:E > 0))
-  - Count below 30 = COUNTIFS(fact_table!E:E, "<30", fact_table!E:E, ">0")
-  - Count below 50 = COUNTIFS(fact_table!E:E, "<50", fact_table!E:E, ">0")
-  - Count below 100 = COUNTIFS(fact_table!E:E, "<100", fact_table!E:E, ">0")
-  - Count below 1000 = COUNTIFS(fact_table!E:E, "<1000", fact_table!E:E, ">0")
+  - Smallest non -zero base
+
+    ```excel
+    = MINIFS(fact_table!E:E, fact_table!E:E, ">0")
+
+  - 25th percentile (non-zero)
+  
+    ```excel
+    = PERCENTILE.INC(FILTER(fact_table!E:E, fact_table!E:E > 0), 0.25)
+
+  - Median (non-zero)
+
+    ```excel
+    = MEDIAN(FILTER(fact_table!E:E, fact_table!E:E > 0))
+
+  - Count below 30
+
+    ```excel
+    = COUNTIFS(fact_table!E:E, "<30", fact_table!E:E, ">0")
+
+  - Count below 50
+  
+    ```excel
+    = COUNTIFS(fact_table!E:E, "<50", fact_table!E:E, ">0")
+
+  - Count below 100
+  
+    ```excel
+    = COUNTIFS(fact_table!E:E, "<100", fact_table!E:E, ">0")
+
+  - Count below 1000
+  
+    ```excel
+    = COUNTIFS(fact_table!E:E, "<1000", fact_table!E:E, ">0")
 
   These result shows that data is heavily skewed toward large operating bases. Only 9 out of 97 rows(including 0 registered) fall below 100, while the 25th percentile is 1385.75 and the median is 4067.5. Based on this, a conservative threshold was setup at 100, so that Base Flag statistically flags fragile rows without compromising overall coverage.
 
@@ -104,22 +192,85 @@ The goal is to build a transparent, annotated dashboard and dataset pipeline tha
 
   Formulas used above:
 
-  - Smallest non-zero rate = MINIFS(Table1_14[Appearance Rate], Table1_14[Registered], ">0")
-  - 25th percentile = PERCENTILE.INC(FILTER(Table1_14[Appearance Rate], Table1_14[Registered]>0), 0.25)
-  - Median = MEDIAN(FILTER(Table1_14[Appearance Rate], Table1_14[Registered]>0))
-  - Count below 90% = COUNTIFS(Table1_14[Appearance Rate], "<0.90")
-  - Count below 95% = COUNTIFS(Table1_14[Appearance Rate], "<0.95")
-  - Count below 96% = COUNTIFS(Table1_14[Appearance Rate], "<0.96")
-  - Count below 98% = COUNTIFS(Table1_14[Appearance Rate], "<0.98")
-  - Count below 98.5% = COUNTIFS(Table1_14[Appearance Rate], "<0.985")
-  - Count below 98.6% = COUNTIFS(Table1_14[Appearance Rate], "<0.986")
-  - Count below 98.7% = COUNTIFS(Table1_14[Appearance Rate], "<0.987")
-  - Count below 98.8% = COUNTIFS(Table1_14[Appearance Rate], "<0.988")
-  - Count below 98.9% = COUNTIFS(Table1_14[Appearance Rate], "<0.989")
-  - Count below 99% = COUNTIFS(Table1_14[Appearance Rate], "<0.99")
-  - Blank fields = COUNTBLANK(Table1_14[Appearance Rate])
-  - Non-empty rows = COUNT(Table1_14[Appearance Rate])
-  - Total Counts = Blank fields + Non-empty rows
+  - Smallest non-zero rate
+  
+    ```excel
+    = MINIFS(Table1_14[Appearance Rate], Table1_14[Registered], ">0")
+
+  - 25th percentile
+
+    ```excel
+    = PERCENTILE.INC(FILTER(Table1_14[Appearance Rate], Table1_14[Registered]>0), 0.25)
+
+  - Median
+  
+    ```excel
+    = MEDIAN(FILTER(Table1_14[Appearance Rate], Table1_14[Registered]>0))
+
+  - Count below 90%
+  
+    ```excel
+    = COUNTIFS(Table1_14[Appearance Rate], "<0.90")
+
+  - Count below 95%
+  
+    ```excel
+    = COUNTIFS(Table1_14[Appearance Rate], "<0.95")
+
+  - Count below 96%
+  
+    ```excel
+    = COUNTIFS(Table1_14[Appearance Rate], "<0.96")
+
+  - Count below 98%
+  
+    ```excel
+    = COUNTIFS(Table1_14[Appearance Rate], "<0.98")
+
+  - Count below 98.5%
+  
+    ```excel
+    = COUNTIFS(Table1_14[Appearance Rate], "<0.985")
+
+  - Count below 98.6%
+  
+    ```excel
+    = COUNTIFS(Table1_14[Appearance Rate], "<0.986")
+
+  - Count below 98.7%
+  
+    ```excel
+    = COUNTIFS(Table1_14[Appearance Rate], "<0.987")
+
+  - Count below 98.8%
+  
+    ```excel
+    = COUNTIFS(Table1_14[Appearance Rate], "<0.988")
+
+  - Count below 98.9%
+  
+    ```excel
+    = COUNTIFS(Table1_14[Appearance Rate], "<0.989")
+
+  - Count below 99%
+  
+    ```excel
+    = COUNTIFS(Table1_14[Appearance Rate], "<0.99")
+
+  - Blank fields
+  
+    ```excel
+    = COUNTBLANK(Table1_14[Appearance Rate])
+
+  - Non-empty rows
+  
+    ```excel
+    = COUNT(Table1_14[Appearance Rate])
+
+  - Total Counts
+  
+    ```excel
+    = Blank fields + Non-empty rows
 
   These results show that appearance rates are tightly clustered near perfection. Out of 74 non-empty rows, none fall below 95%, only 2 fall below 98%, and the 25th percentile is 99.34% with a median of 99.70%. Based on this, a conservative threshold was set at 98%, so that Anomaly Flag behaviorally flags rare underperformers without diluting overall credibility.
 
@@ -131,7 +282,12 @@ The goal is to build a transparent, annotated dashboard and dataset pipeline tha
   - Rows: School Type
   - Values: Appearance Rate -> Value Field Settings -> Summarize by Max (Max_AppearanceRate)
       Appearance Rate -> Value Field Settings -> Summarize by Min (Min_AppearanceRate)
-  - Helper Column: Outside the pivot, compute Volatility_Range_SchoolType = Max_AppearanceRate - Min_AppearanceRate
+  - Helper Column: Outside the pivot, compute:
+  
+  Volatility_Range_SchoolType
+  
+    ```excel
+    = Max_AppearanceRate - Min_AppearanceRate
 
   Standard Deviation measures how spread out values are from their average. For example, each school types appear in multiple regions. The pivot aggregates all those rows and computes SD of appearance rates across all regions. It's good in detecting behavioral consistency.
 
@@ -171,15 +327,12 @@ The goal is to build a transparent, annotated dashboard and dataset pipeline tha
   6. Pivot Filtering: Excluded "ABSENCE" base status to ensure threshold analysis.
 
   7. Base Flag: Identifies fragile or unstable appearance rates. Used for statistical stability and credibility. The Registered field is your denominator.
-
       "ABSENCE_BASE": No base
 
       "SMALL_BASE": Unstable rates due to small denominators
 
       "VALID_BASE": statistically stable rates
-
     We used Base Status for filtering and Base Flag for analytical annotation.
-
     Mainly, Base Flag is used to protect against fragile denominators. For example, in a school type with only 10 registered students, even a single absence causes a big swing in appearance rate. So, base flag protects against these exaggerated fluctuations. Setting the threshold for small base at 100 registered students, anything below it will be marked as unstable.
 
   8. Anomaly Flag: Identifies behavioral credibility issues. Even if the base is large, the appearance rates may be unusually low or suspiciously perfect for small bases. So, these flags mark rare behaviors.
@@ -191,5 +344,12 @@ The goal is to build a transparent, annotated dashboard and dataset pipeline tha
       "SUSPICIOUS_PERFECTION": Perfect but fragile
 
       "NORMAL": Valid or stable rates.
-      
     Mainly, Anomaly Flag is used to protect against misleading appearance rates. For example, even if a school type has thousands of registered students, the appearance rate may be unusually low compared to the overall distribution, or for small number of registered students, the appearance rate may appear perfect. These behavior may mislead analysis, so labeling them clearly can increase the credibility.
+  
+  9. Integrity Checks: To ensure most basic and logical consistency of dataset, three diagnostics columns were added to the fact_table:
+  
+      Integrity_RateCheck: Flags appearance rates outside the logical range (0-1).
+
+      Integrity_RegisteredCheck: Flags cases where appeared students > registered students.
+
+      Integrity_MissingCheck: Flags rows with missing or zero values in appeared or registered columns.
