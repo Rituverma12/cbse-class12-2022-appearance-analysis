@@ -21,7 +21,7 @@ The goal is to build a transparent, annotated dashboard and dataset pipeline tha
   - Promoted headers and set data types
   - Renamed 'Type' column to 'Region' (for clarity and consistency)
   - Unpivoted School Types from CTSA to KV, resulting in 'Attribute' and 'Value' columns.
-  - Renamed 'Attribute' column to 'School Type'
+  - Renamed 'Attribute' column to 'School Type.'
   - Pivoted 'Status' into 'Regd.' and 'Appd.' columns.
   - Added computed column:
 
@@ -108,7 +108,7 @@ The goal is to build a transparent, annotated dashboard and dataset pipeline tha
 
   Small bases can produce fragile or misleading rates, while large bases provide stable evidence of performance.
 
-  - Create a pivot table from 'fact-table'
+  - Create a pivot table from 'fact-table.'
   - Rows: Region, School Type
   - Values: Registered -> Value Field Settings -> Value Field = Min
   - Filter: Base Status -> Dropped-down arrow -> Select only "NON-ZERO" to exclude ABSENT status.
@@ -116,7 +116,7 @@ The goal is to build a transparent, annotated dashboard and dataset pipeline tha
 
 - **"profiling_baseflag" sheet**
 
-  The profiling sheet was created to support the credibility of setting up small base later. To determine the size of the base, so that denominator is large enough to be statistically stable. It specifically analyzes the distribution of registered counts across different threshold.
+  The profiling sheet was created to support the credibility of setting up a small base later. To determine the size of the base, so that the denominator is large enough to be statistically stable. It specifically analyzes the distribution of registered counts across different thresholds.
 
   The table below summarizes key metrics:
 
@@ -132,7 +132,7 @@ The goal is to build a transparent, annotated dashboard and dataset pipeline tha
 
   Formulas used above:
 
-  - Smallest non -zero base
+  - Smallest non-zero base
 
     ```excel
     = MINIFS(fact_table!E:E, fact_table!E:E, ">0")
@@ -167,7 +167,7 @@ The goal is to build a transparent, annotated dashboard and dataset pipeline tha
     ```excel
     = COUNTIFS(fact_table!E:E, "<1000", fact_table!E:E, ">0")
 
-  These result shows that data is heavily skewed toward large operating bases. Only 9 out of 97 rows(including 0 registered) fall below 100, while the 25th percentile is 1385.75 and the median is 4067.5. Based on this, a conservative threshold was setup at 100, so that Base Flag statistically flags fragile rows without compromising overall coverage.
+  These result shows that data is heavily skewed toward large operating bases. Only 9 out of 97 rows(including 0 registered) fall below 100, while the 25th percentile is 1385.75 and the median is 4067.5. Based on this, a conservative threshold was set at 100, so that Base Flag statistically flags fragile rows without compromising overall coverage.
 
 - **"profiling_anomalyflag" sheet**
 
@@ -194,7 +194,7 @@ The goal is to build a transparent, annotated dashboard and dataset pipeline tha
   |Non-empty rows          | 74             |
   |Total Counts            | 96             |
 
-  This diagonistic step ensures that the anomaly flag is based on real data patterns rather than assumptions. Hence, set up a threshold for "LOW_RATE" classification.
+  This diagnostic step ensures that the anomaly flag is based on real data patterns rather than assumptions. Hence, set up a threshold for "LOW_RATE" classification.
 
   Formulas used above:
 
@@ -295,9 +295,9 @@ The goal is to build a transparent, annotated dashboard and dataset pipeline tha
       ```excel
       = Max_AppearanceRate - Min_AppearanceRate
 
-  Standard Deviation measures how spread out values are from their average. For example, each school types appear in multiple regions. The pivot aggregates all those rows and computes SD of appearance rates across all regions. It's good in detecting behavioral consistency.
+  Standard Deviation measures how spread out the values are from their average. For example, each school type appears in multiple regions. The pivot aggregates all those rows and computes the SD of appearance rates across all regions. It's good at detecting behavioral consistency.
 
-  Range detacts extremes across regions. Higher range value indicates that school type has inconsistent behavior across regions. Low range indicates that school type is uniformly performing.
+  Range detacts extremes across regions. A higher range value indicates that the school type has inconsistent behavior across regions. Low range indicates that the school type is uniformly performing.
 
   Interpretation:
   - KV shows the most stable behavior (lowest StdDev and Range)
@@ -312,11 +312,11 @@ The goal is to build a transparent, annotated dashboard and dataset pipeline tha
 
   - Clustered Column Chart: [Volatility Column Chart](images/Volatility%20Index%20by%20School%20Type.png)
 
-    A clustered column chart was created to compare StdDev and Range side by side for each school type, highlighting which school types are behaviorally consistent (low StdDev) and which show wide performance swings (high Range). From the chart we can see, KV schools show the lowest volatility across both metrics, while GOVT schools show the highest.
+    A clustered column chart was created to compare StdDev and Range side by side for each school type, highlighting which school types are behaviorally consistent (low StdDev) and which show wide performance swings (high Range). From the chart, we can see that KV schools show the lowest volatility across both metrics, while GOVT schools show the highest.
 
   - Dual Axis Chart: [Volatility Dual Axis Chart](images/Volatility%20Index%20by%20School%20Type(Dual%20Axis).png)
 
-    A dual axis chart was created to plot Volatility_StdDev_SchoolType as bars and Volatility_Range_SchoolType as a line on a secondary axis. The chart highlights a clear view of consistency (StdDev) versus extremes (Range) in one visual. It is useful for identifying school types that are tightly clustered but still have outlier regions.
+    A dual-axis chart was created to plot Volatility_StdDev_SchoolType as bars and Volatility_Range_SchoolType as a line on a secondary axis. The chart highlights a clear view of consistency (StdDev) versus extremes (Range) in one visual. It is useful for identifying school types that are tightly clustered but still have outlier regions.
 
 ### Data Quality Checks
 
@@ -339,7 +339,7 @@ The goal is to build a transparent, annotated dashboard and dataset pipeline tha
 
       "VALID_BASE": statistically stable rates
     We used Base Status for filtering and Base Flag for analytical annotation.
-    Mainly, Base Flag is used to protect against fragile denominators. For example, in a school type with only 10 registered students, even a single absence causes a big swing in appearance rate. So, base flag protects against these exaggerated fluctuations. Setting the threshold for small base at 100 registered students, anything below it will be marked as unstable.
+    Mainly, Base Flag is used to protect against fragile denominators. For example, in a school with only 10 registered students, even a single absence causes a big swing in the attendance rate. So, the base flag protects against these exaggerated fluctuations. Setting the threshold for a small base at 100 registered students, anything below it will be marked as unstable.
 
   8. Anomaly Flag: Identifies behavioral credibility issues. Even if the base is large, the appearance rates may be unusually low or suspiciously perfect for small bases. So, these flags mark rare behaviors.
 
@@ -350,12 +350,25 @@ The goal is to build a transparent, annotated dashboard and dataset pipeline tha
       "SUSPICIOUS_PERFECTION": Perfect but fragile
 
       "NORMAL": Valid or stable rates.
-    Mainly, Anomaly Flag is used to protect against misleading appearance rates. For example, even if a school type has thousands of registered students, the appearance rate may be unusually low compared to the overall distribution, or for small number of registered students, the appearance rate may appear perfect. These behavior may mislead analysis, so labeling them clearly can increase the credibility.
+    Mainly, the Anomaly Flag is used to protect against misleading appearance rates. For example, even if a school type has thousands of registered students, the appearance rate may be unusually low compared to the overall distribution, or for a small number of registered students, the appearance rate may appear perfect. These behaviors may mislead analysis, so labeling them clearly can increase the credibility.
   
-  9. Integrity Checks: To ensure most basic and logical consistency of dataset, three diagnostics columns were added to the fact_table:
+  9. Integrity Checks: To ensure the most basic and logical consistency of the dataset, three diagnostics columns were added to the fact_table:
 
       Integrity_RateCheck: Flags appearance rates outside the logical range (0-1).
 
-      Integrity_RegisteredCheck: Flags cases where appeared students > registered students.
+      Integrity_RegisteredCheck: Flags cases where students appeared> registered students.
 
       Integrity_MissingCheck: Flags rows with missing or zero values in appeared or registered columns.
+
+
+### Credibility Dashboard - CBSE Class 12 (2022)
+
+This dashboard consolidates integrity checks, base flags, anomaly flags, and volatility profiling.
+
+Slicer Used- Region and School Type.
+  The two slicers dynamically filter the first three panels (Integrity, Base, Anomaly).
+  The volatility panel is static and does not respond to slicers.
+
+All slicer-connected charts are built from a unified Power Query Data Model.
+
+
