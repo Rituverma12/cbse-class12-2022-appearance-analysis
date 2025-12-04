@@ -26,9 +26,9 @@ To reshape the raw CBSE Class 12 2022 dataset into a structured format suitable 
 - **Appearance Rate**
 
     ```powerquery
-      = if [#"Regd."] > 0 then [#"Appd."]/[#"Regd."] else null```
+      = if [#"Regd."] > 0 then [#"Appd."]/[#"Regd."] else null
 
-Renamed 'Regd.' and 'Appd.' to 'Registered' and 'Appeared'
+Renamed `Regd.` and `Appd.` to `Registered` and `Appeared`
 
 - **No-show Rate**
 

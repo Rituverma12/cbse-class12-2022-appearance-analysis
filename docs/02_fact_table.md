@@ -10,62 +10,62 @@ The **fact_table** serves as the analytical backbone of this project. It consoli
 
 ## **Diagnostic Columns**
 
-1. **Base Status** - Flags whether a row has any registered students.
+- **Base Status** - Flags whether a row has any registered students.
 
     ```excel
-      = IF([@Registered] = 0, "ABSENT", "NON_ZERO")```
+      = IF([@Registered] = 0, "ABSENT", "NON_ZERO")
 
-    - **Purpose:** Simplifies filtering by excluding rows with no base.
+**Purpose:** Simplifies filtering by excluding rows with no base.
 
-2. **Base Flag** - Classifies denominator stability
-
-    ```excel
-      = IF([@[Registered]] = 0, "ABSENT_BASE", IF([@[Registered]]<100, "SMALL_BASE", "VALID_BASE"))```
-    
-    - **Purpose:** Protects against fragile denominators.
-
-    - **Threshold:** 100 registered students chosen based on profiling distribution (see [04_baseflag_summary.md](04_baseflag_summary.md)).
-
-3. **Anomaly Flag** - Identifies suspicious or rare behaviors in appearance rates.
+- **Base Flag** - Classifies denominator stability
 
     ```excel
-      = IF([@Registered]=0, "ABSENT", IF([@[Appearance Rate]]<0.98, "LOW_RATE", IF(AND([@[Appearance Rate]]=1, [@Registered]<100), "SUSPICIOUS_PERFECTION", "NORMAL")))```
-    
-    - **Purpose:** Detects credibility risks:
-      - **LOW_RATES:** Rare Underperformers(<98%)(see 05_anomaly_summary.md).
-      - **SUSPICIOUS_PERFECTION:** Perfect rates in small bases.
-      - **NORMAL:** Stable rates.
+      = IF([@[Registered]] = 0, "ABSENT_BASE", IF([@[Registered]]<100, "SMALL_BASE", "VALID_BASE"))
 
-4. **Coverage Share** - Measures school type dominance within a region.
+**Purpose:** Protects against fragile denominators.
+
+**Threshold:** 100 registered students chosen based on profiling distribution (see [04_baseflag_summary.md](04_baseflag_summary.md)).
+
+- **Anomaly Flag** - Identifies suspicious or rare behaviors in appearance rates.
 
     ```excel
-      = [@Registered]/SUM([Registered])```
-    
-    - **Purpose:** Shows proportional contribution of school type to regional totals.
+      = IF([@Registered]=0, "ABSENT", IF([@[Appearance Rate]]<0.98, "LOW_RATE", IF(AND([@[Appearance Rate]]=1, [@Registered]<100), "SUSPICIOUS_PERFECTION", "NORMAL")))
 
-    - **Analytical Use:** Highlights whether anomalies occur in dominant or marginal categories.
+**Purpose:** Detects credibility risks:
+    - **LOW_RATES:** Rare Underperformers(<98%)(see 05_anomaly_summary.md).
+    - **SUSPICIOUS_PERFECTION:** Perfect rates in small bases.
+    - **NORMAL:** Stable rates.
 
-5. **Integrity Checks** - Logical Consistency Tests:
+- **Coverage Share** - Measures school type dominance within a region.
 
-    - **Integrity_RateCheck**
+    ```excel
+      = [@Registered]/SUM([Registered])
+
+**Purpose:** Shows proportional contribution of school type to regional totals.
+
+**Analytical Use:** Highlights whether anomalies occur in dominant or marginal categories.
+
+- **Integrity Checks** - Logical Consistency Tests:
+
+    1. **Integrity_RateCheck**
 
         ```excel
-        = IF(OR([@[Appearance Rate]]<0, [@[Appearance Rate]]>1), "FLAG", "OK")```
-        
+            = IF(OR([@[Appearance Rate]]<0, [@[Appearance Rate]]>1), "FLAG", "OK")
+            
 
-    - **Integrity_RegisteredCheck**
-
-        ```excel
-        = IF([@Appeared]>[@Registered], "FLAG", "OK")```
-
-    - **Integrity_MissingCheck**
+    2. **Integrity_RegisteredCheck**
 
         ```excel
-        = IF(OR(ISBLANK([@Registered]), ISBLANK([@Appeared]), [@Registered]=0, [@Appeared]=0), "FLAG", "OK")```
-    
-    - **Purpose:** Ensures data integrity before analysis.
+            = IF([@Appeared]>[@Registered], "FLAG", "OK")
 
-    - **Pipeline role:** These checks were letter unpivoted in Power Query to create `Integrity_CheckType` and `Integrity_CheckResult` for dashboard pivots.
+    3. **Integrity_MissingCheck**
+
+        ```excel
+            = IF(OR(ISBLANK([@Registered]), ISBLANK([@Appeared]), [@Registered]=0, [@Appeared]=0), "FLAG", "OK")
+
+**Purpose:** Ensures data integrity before analysis.
+
+**Pipeline role:** These checks were letter unpivoted in Power Query to create `Integrity_CheckType` and `Integrity_CheckResult` for dashboard pivots.
 
 ## **Analytical Notes**
 
