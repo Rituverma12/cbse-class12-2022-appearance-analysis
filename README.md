@@ -370,5 +370,3 @@ Slicer Used- Region and School Type.
   The volatility panel is static and does not respond to slicers.
 
 All slicer-connected charts are built from a unified Power Query Data Model.
-
-
