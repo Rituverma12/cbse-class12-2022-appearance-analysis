@@ -1,7 +1,7 @@
 
 # **Power Query Transformation - CBSE Class XII 2022**
 
-To reshape the raw CBSE Class 12 2022 dataset into a structured format suitable for credibility diagnostics. Power Query was used to clean, normalize, and compute foundational fields. All the diagnostics flags and integreted checks were added later in Excel.
+To reshape the raw CBSE Class 12 2022 dataset into a structured format suitable for credibility diagnostics. Power Query was used to clean, normalize, and compute foundational fields. All the diagnostic flags and integrated checks were added later in Excel.
 
 ## **Transformation Steps**
 
@@ -23,43 +23,37 @@ To reshape the raw CBSE Class 12 2022 dataset into a structured format suitable 
 
 ## **Computed Columns**
 
-- **Appearance Rate**
+### **Appearance Rate**
 
-    ```powerquery
-      = if [#"Regd."] > 0 then [#"Appd."]/[#"Regd."] else null
+    = if [#"Regd."] > 0 then [#"Appd."]/[#"Regd."] else null
 
-Renamed `Regd.` and `Appd.` to `Registered` and `Appeared`
+- Renamed `Regd.` and `Appd.` to `Registered` and `Appeared`
 
-- **No-show Rate**
+### **No-show Rate**
 
-    ```powerquery
-      = if [Registered] > 0 then 1 - ([Appeared] / [Registered]) else null```
+    = if [Registered] > 0 then 1 - ([Appeared] / [Registered]) else null
 
-- **Absence Flag**
+### **Absence Flag**
 
-    ```powerquery
-      = if [Registered] = 0 and [Appeared] = 0 then "ABSENT" else null```
+    = if [Registered] = 0 and [Appeared] = 0 then "ABSENT" else null
       
-- **Error Flag**
+### **Error Flag**
 
-    ```powerquery
-      = if [Registered] = 0 and [Appeared] > 0 then "DATA_ERROR" else null```
+    = if [Registered] = 0 and [Appeared] > 0 then "DATA_ERROR" else null
 
-- **Missing Flag**
+### **Missing Flag**
   
-    ```powerquery
-      = if [Registered] = null or [Appeared] = null then "MISSING" else null```
+    = if [Registered] = null or [Appeared] = null then "MISSING" else null
       
-- **Failure Flag**
+### **Failure Flag**
 
-    ```powerquery
-      = if [Registered] > 0 and [Appeared] = 0 then "FAIL" else null```
+    = if [Registered] > 0 and [Appeared] = 0 then "FAIL" else null
 
 ## **Clean Output**
 
 - Removed: Error Flag, Missing Flag, and Failure Flag(no cases found).
 
-- Final query output renamed -> `class12-2022 result`. (Hidded later for convenience.)
+- Final query output renamed -> `class12-2022 result`. (Hidden later for convenience.)
 
 - Loaded into Excel as the **fact_table** for downstream diagnostics.
 
@@ -82,15 +76,15 @@ After diagnostic columns were added in Excel(`Integrity_RateCheck`, `Integrity_R
 ## **Analytical Notes**
 
 - Power Query handled the initial reshaping and foundational metrics.
-- All diagnostics flags were added in Excel for transparency and formula control.
-- Loading to Data Model ensured unified slicer control across dashboard panels.
+- All diagnostic flags were added in Excel for transparency and formula control.
+- Loading to the Data Model ensured unified slicer control across dashboard panels.
 
 ## **Pipeline Context**
 
 This Power Query transformation corresponds to the **Data Cleaning & Preprocessing stage of the data analysis pipeline.
 
 - Raw dataset -> cleaned, normalized table.
-- Headers, data types, and column names standarized.
+- Headers, data types, and column names standardized.
 - School types unpivoted, status pivoted.
 - Appearance Rate and No-show Rate computed.
 - Invalid flags removed.
