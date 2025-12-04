@@ -41,7 +41,7 @@ The **fact_table** serves as the analytical backbone of this project. It consoli
     ```excel
       = [@Registered]/SUM([Registered])
 
-**Purpose:** Shows proportional contribution of school type to regional totals.
+    `**Purpose:** Shows proportional contribution of school type to regional totals.`
 
 **Analytical Use:** Highlights whether anomalies occur in dominant or marginal categories.
 
