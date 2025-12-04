@@ -26,34 +26,34 @@ To reshape the raw CBSE Class 12 2022 dataset into a structured format suitable 
 - **Appearance Rate**
 
     ```powerquery
-      = if [#"Regd."] > 0 then [#"Appd."]/[#"Regd."] else null
+      = if [#"Regd."] > 0 then [#"Appd."]/[#"Regd."] else null```
 
-    Renamed 'Regd.' and 'Appd.' to 'Registered' and 'Appeared'
+Renamed 'Regd.' and 'Appd.' to 'Registered' and 'Appeared'
 
 - **No-show Rate**
 
     ```powerquery
-      = if [Registered] > 0 then 1 - ([Appeared] / [Registered]) else null
+      = if [Registered] > 0 then 1 - ([Appeared] / [Registered]) else null```
 
 - **Absence Flag**
 
     ```powerquery
-      = if [Registered] = 0 and [Appeared] = 0 then "ABSENT" else null
+      = if [Registered] = 0 and [Appeared] = 0 then "ABSENT" else null```
       
 - **Error Flag**
 
     ```powerquery
-      = if [Registered] = 0 and [Appeared] > 0 then "DATA_ERROR" else null
+      = if [Registered] = 0 and [Appeared] > 0 then "DATA_ERROR" else null```
 
 - **Missing Flag**
   
     ```powerquery
-      = if [Registered] = null or [Appeared] = null then "MISSING" else null
+      = if [Registered] = null or [Appeared] = null then "MISSING" else null```
       
 - **Failure Flag**
 
     ```powerquery
-      = if [Registered] > 0 and [Appeared] = 0 then "FAIL" else null
+      = if [Registered] > 0 and [Appeared] = 0 then "FAIL" else null```
 
 ## **Clean Output**
 

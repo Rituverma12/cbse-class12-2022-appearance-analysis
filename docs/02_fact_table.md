@@ -13,14 +13,14 @@ The **fact_table** serves as the analytical backbone of this project. It consoli
 1. **Base Status** - Flags whether a row has any registered students.
 
     ```excel
-      = IF([@Registered] = 0, "ABSENT", "NON_ZERO")
-    
+      = IF([@Registered] = 0, "ABSENT", "NON_ZERO")```
+
     - **Purpose:** Simplifies filtering by excluding rows with no base.
 
 2. **Base Flag** - Classifies denominator stability
 
     ```excel
-      = IF([@[Registered]] = 0, "ABSENT_BASE", IF([@[Registered]]<100, "SMALL_BASE", "VALID_BASE"))
+      = IF([@[Registered]] = 0, "ABSENT_BASE", IF([@[Registered]]<100, "SMALL_BASE", "VALID_BASE"))```
     
     - **Purpose:** Protects against fragile denominators.
 
@@ -29,7 +29,7 @@ The **fact_table** serves as the analytical backbone of this project. It consoli
 3. **Anomaly Flag** - Identifies suspicious or rare behaviors in appearance rates.
 
     ```excel
-      = IF([@Registered]=0, "ABSENT", IF([@[Appearance Rate]]<0.98, "LOW_RATE", IF(AND([@[Appearance Rate]]=1, [@Registered]<100), "SUSPICIOUS_PERFECTION", "NORMAL")))
+      = IF([@Registered]=0, "ABSENT", IF([@[Appearance Rate]]<0.98, "LOW_RATE", IF(AND([@[Appearance Rate]]=1, [@Registered]<100), "SUSPICIOUS_PERFECTION", "NORMAL")))```
     
     - **Purpose:** Detects credibility risks:
       - **LOW_RATES:** Rare Underperformers(<98%)(see 05_anomaly_summary.md).
@@ -39,7 +39,7 @@ The **fact_table** serves as the analytical backbone of this project. It consoli
 4. **Coverage Share** - Measures school type dominance within a region.
 
     ```excel
-      = [@Registered]/SUM([Registered])
+      = [@Registered]/SUM([Registered])```
     
     - **Purpose:** Shows proportional contribution of school type to regional totals.
 
@@ -50,18 +50,18 @@ The **fact_table** serves as the analytical backbone of this project. It consoli
     - **Integrity_RateCheck**
 
         ```excel
-        = IF(OR([@[Appearance Rate]]<0, [@[Appearance Rate]]>1), "FLAG", "OK")
+        = IF(OR([@[Appearance Rate]]<0, [@[Appearance Rate]]>1), "FLAG", "OK")```
         
 
     - **Integrity_RegisteredCheck**
 
         ```excel
-        = IF([@Appeared]>[@Registered], "FLAG", "OK")
+        = IF([@Appeared]>[@Registered], "FLAG", "OK")```
 
     - **Integrity_MissingCheck**
 
         ```excel
-        = IF(OR(ISBLANK([@Registered]), ISBLANK([@Appeared]), [@Registered]=0, [@Appeared]=0), "FLAG", "OK")
+        = IF(OR(ISBLANK([@Registered]), ISBLANK([@Appeared]), [@Registered]=0, [@Appeared]=0), "FLAG", "OK")```
     
     - **Purpose:** Ensures data integrity before analysis.
 
