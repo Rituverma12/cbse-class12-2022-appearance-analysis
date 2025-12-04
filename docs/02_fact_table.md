@@ -47,7 +47,11 @@ The **fact_table** serves as the analytical backbone of this project. It consoli
 - **Purpose:** Shows proportional contribution of school type to regional totals.  
 - **Analytical Use:** Highlights whether anomalies occur in dominant or marginal categories.
 
+<<<<<<< HEAD
 ### Integrity Checks — Logical Consistency Tests
+=======
+    `**Purpose:** Shows proportional contribution of school type to regional totals.`
+>>>>>>> f2fdbad56233076b6a7e93ad8363f9ddb08b3469
 
 #### Integrity_RateCheck
 
