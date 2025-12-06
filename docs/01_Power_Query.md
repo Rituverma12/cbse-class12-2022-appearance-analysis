@@ -6,7 +6,7 @@ To reshape the raw CBSE Class 12 2022 dataset into a structured format suitable 
 ## **Transformation Steps**
 
 - **Load raw dataset into Power Query Editor**
-  - Imported `class12-2022 raw_dataset.csv`
+  - Imported `class12-2022 raw_dataset.csv.`
   - Promoted headers and set data types.
   - Renamed `Type` column -> `Region` for clarity and consistency.
 
@@ -105,9 +105,9 @@ After diagnostic columns were added in Excel(`Integrity_RateCheck`, `Integrity_R
 
 ## **Analytical Notes**
 
-- Power Query handled the initial reshaping and foundational metrics (headed, unpivot/pivot, computed rates).
+- Power Query handled the initial reshaping and foundational metrics (header, unpivot/pivot, computed rates).
 - Diagnostic flags (BaseStatus, BaseFlag, AnomalyFlag) were initially added in Excel for formula control, but have since been migrated into Power Query as custom columns.
-- Integrity checks were unpivoted and loaded into the Data Model, expanding row count but enabling consitent pivoting across check types.
+- Integrity checks were unpivoted and loaded into the Data Model, expanding row count but enabling consistent pivoting across check types.
 - Loading to the Data Model ensures unified slicer control across all dashboard panels, with both categorical flags (from Power Query).
 
 ## **Pipeline Context**
@@ -132,4 +132,4 @@ This Power Query transformation corresponds to the **Data Cleaning & Preprocessi
 
 - **Communication**  
   Analytical README and dashboard storytelling.  
-  Documentation in `/docs/` folder explains each transformation and design choice for transparency.
+  Documentation in the `/docs/` folder explains each transformation and design choice for transparency.
