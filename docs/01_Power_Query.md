@@ -1,149 +1,62 @@
+# Power Query Transformation — CBSE Class XII 2022
 
-# **Power Query Transformation - CBSE Class XII 2022**
+## Purpose
 
-To reshape the raw CBSE Class 12 2022 dataset into a structured format suitable for credibility diagnostics. Power Query was used to clean, normalize, and compute foundational fields. Diagnostic flags were initially added in Excel for formula control. They have since been migrated into Power Query as custom columns to ensure reproducibility and transparency within the Data Model.
+- This stage reshapes the raw CBSE Class 12 (2022) dataset into a structured format suitable for credibility diagnostics.
 
-## **Transformation Steps**
+- Power Query was used to clean, normalize, and compute foundational fields.
 
-- **Load raw dataset into Power Query Editor**
-  - Imported `class12-2022 raw_dataset.csv.`
-  - Promoted headers and set data types.
-  - Renamed `Type` column -> `Region` for clarity and consistency.
-  - Raw dataset loaded into Power Query Editor with headers promoted and the data types applied.
-  
-  ![Power Query Editor Preview](../images/PowerQueryEditorPreview.png)
+- By migrating diagnostic flags into Power Query and unpivoting integrity checks, the pipeline becomes reproducible, transparent, and fully refreshable.
 
-- **Unpivot School Type**
-  - Selected columns from `CSTA` to `KV`.
-  - Applied **Unpivot Columns**, resulting in:
-    - `Attribute` -> renamed to `School Type`.
-    - `Value` -> holds registered/appeared counts.
-  - Wide format with CTSA, GOVT, GOVT AIDED, INDEPENDENT, JNV, KV as separate columns.
+## Key Transformations
 
-  ![Wide Format of School Types](../images/SeparateFormatSchoolTypes.png)
+### 1. Load Raw Dataset
 
-  - Long format with `Attribute` and `Value`, later renamed `Attribute` to `School Type` and pivoted `Value` to `Regd.` and `Appd.`.
+- Imported `class12-2022 raw_dataset.csv` into Power Query Editor.
+- Standardized headers and data types.
+- Renamed `Type` → `Region` for clarity.
 
-  ![Long Format of School Types](../images/LongFormSchoolTypes.png)
+![Power Query Editor preview](../images/PowerQueryEditorPreview.png)
 
-- **Pivot Status**
-  - Pivoted `Value` column into two fields
-    - `Regd.` -> later renamed `Registered`.
-    - `Appd.` -> later named `Appeared`.
+### 2. Unpivot School Type
 
-## **Computed Columns**
+- Converted wide format (CTSA, GOVT, GOVT AIDED, INDEPENDENT, JNV, KV) into long format.
+- Resulting fields: `School Type`, `Value`.
 
-### **Appearance Rate**
+![Unpivot School Type before/after](../images/SeparateFormatSchoolTypes.png)
 
-    = if [#"Regd."] > 0 then [#"Appd."]/[#"Regd."] else null
+### 3. Pivot Value
 
-- Renamed `Regd.` and `Appd.` to `Registered` and `Appeared`
+- Pivoted `Value` column into two fields: `Registered` and `Appeared`.
 
-### **No-show Rate**
+![Pivot Status preview](../images/LongFormSchoolTypes.png)
 
-    = if [Registered] > 0 then 1 - ([Appeared] / [Registered]) else null
+*Pivoting Status column produces separate fields for Registered and Appeared counts.*
 
-### **Absence Flag**
+### 4. Diagnostic Flags
 
-    = if [Registered] = 0 and [Appeared] = 0 then "ABSENT" else null
-      
-### **Error Flag**
+- Added flags for base status, base size, and anomalies directly in Power Query.
+- Ensures reproducibility and removes dependency on worksheet formulas.
 
-    = if [Registered] = 0 and [Appeared] > 0 then "DATA_ERROR" else null
+### 5. Integrity Check Reshaping
 
-### **Missing Flag**
-  
-    = if [Registered] = null or [Appeared] = null then "MISSING" else null
-      
-### **Failure Flag**
+- Unpivoted integrity check columns into:
+  - `Integrity_CheckType`
+  - `Integrity_CheckResult`
+- Expanded row count (each record contributes multiple check results).
+- Enables consistent pivoting and aggregation across check types.
 
-    = if [Registered] > 0 and [Appeared] = 0 then "FAIL" else null
+### 6. Clean Output
 
-## **Diagnostic Flag Migration**
+- Removed unused flags (Error, Missing, Failure — no records present).
+- Final query output renamed `class12-2022 result`.
+- Loaded into the Data Model for use in pivots and dashboards.
 
-To ensure reproducibility and element dependency on worksheet formulas, the following flags were migrated into Power Query:
+![Final query output](../images/DataModelQueryVisual.png)
 
-- **BaseStatus**:
+## Analytical Role
 
-      = if [Registered] = 0 then "ABSENT" else "NON_ZERO"
-
-- **BaseFlag**:
-
-      = if [Registered] = 0 then "ABSENT_BASE" else if [Registered] < 100 then "SMALL_BASE" else "VALID_BASE"
-
-- **AnomalyFlag**:
-
-      = if [Registered] = 0 then "ABSENT" else if [Appearance Rate] < 0.98 then "LOW_RATE" else if [Appearance Rate] = 1 and [Registered] < 100 then "SUSPICIOUS_PERFECTION" else "NORMAL"
-
-These columns are now part of the unified Data Model (`Table1_14 2`) and are used across all dashboard pivots and slicers.
-
-Diagnostic flags migrated into Power Query as custom columns for reproducibility.
-
-## **Integrity Check Reshaping (Later Step)**
-
-After diagnostic columns were added in Excel(`Integrity_RateCheck`, `Integrity_RegisteredCheck`, `Integrity_MissingCheck`), a separate Power Query step was used to:
-
-- **Unpivot the three integrity check columns**
-
-  - Resulting Fields:
-
-    - `Integrity_CheckType`
-    - `Integrity_CheckResult`
-  
-  - Row Expansion Notes:
-
-    - Unpivoting the three integrity check columns expanded the row count from 96 to 288.
-    - Each original row now contributes three records (one per check type).
-    - This transformation enables consistent pivoting and flag aggregation across check types.
-
-- **Load to Data Model**
-  
-  - Saved as **Connection only**.
-  - Used for building the **Integrity Summary Pivot Table**.
-
-## **Clean Output**
-
-- Removed: Error Flag, Missing Flag, and Failure Flag(no cases found).
-
-- Final query output renamed -> `class12-2022 result`. (Hidden later for convenience.)
-
-- Loaded into Excel as the staging query (`fact_table`). This table is no longer used for pivot analysis. All dashboards now source from the unified Data Model.
-
-![Final Query result in the Data Model.](../images/DataModelQueryVisual.png)
-
-## **Reproducibility Commitment**
-  
-- All transformations, flags, and metrices are now calculated within Power Query or DAX.
-- No worksheet formulas are used in the analysis layer.
-- This ensures that the pipeline is fully refreshable, auditable, and transparent.
-
-## **Analytical Notes**
-
-- Power Query handled the initial reshaping and foundational metrics (header, unpivot/pivot, computed rates).
-- Diagnostic flags (BaseStatus, BaseFlag, AnomalyFlag) were initially added in Excel for formula control, but have since been migrated into Power Query as custom columns.
-- Integrity checks were unpivoted and loaded into the Data Model, expanding row count but enabling consistent pivoting across check types.
-- Loading to the Data Model ensures unified slicer control across all dashboard panels, with both categorical flags (from Power Query).
-
-## **Pipeline Context**
-
-This Power Query transformation corresponds to the **Data Cleaning & Preprocessing stage** of the data analysis pipeline.
-
-- **Data Cleaning & Preprocessing**  
-  Raw dataset reshaped in Power Query: headers standardized, school types unpivoted, status pivoted, rates computed.
-
-- **Feature Engineering**  
-  Diagnostic flags (BaseStatus, BaseFlag, AnomalyFlag) migrated into Power Query as custom columns.  
-  Integrity checks unpivoted into long format for consistent pivoting.  
-  All flags now live in the Data Model, ensuring reproducibility.
-
-- **Exploratory Analysis**  
-  Distribution profiling (percentiles, medians, counts) implemented as DAX measures.  
-  Pivot tables and slicers built from the unified Data Model.  
-  Profiling sheets (base flag, anomaly flag, volatility) are slicer-aware and refreshable.
-
-- **Modeling (future work)**  
-  Statistical tests and advanced diagnostics to be added as extensions to the Data Model.
-
-- **Communication**  
-  Analytical README and dashboard storytelling.  
-  Documentation in the `/docs/` folder explains each transformation and design choice for transparency.
+- **Reproducibility:** All transformations and flags are now calculated within Power Query or DAX.  
+- **Transparency:** Applied steps are visible and auditable in the query editor.  
+- **Consistency:** Unpivoted integrity checks and diagnostic flags ensure slicer‑aware pivots across all dashboards.  
+- **Pipeline Context:** This transformation corresponds to the **Data Cleaning & Preprocessing stage**, feeding downstream integrity, anomaly, and volatility summaries.
