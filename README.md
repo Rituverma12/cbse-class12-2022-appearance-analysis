@@ -81,12 +81,18 @@
 
 ## Repository Contents
 
-- `class12-2022 cleaned (version 2).xlsb` — main Excel workbook with pivot summaries and profiling sheets.
-        - `pivot_baseflag_summary` — frequency vs coverage analysis of base flags.  
-        - `pivot_integrity_summary` — logical consistency checks and flagged proportions.  
-        - `pivot_anomaly_summary` — anomaly profiling by type and coverage share.  
-        - `charts_volatility` — volatility measures across school types.  
-        - `profiling_*` sheets — deeper statistical profiling of base flags, anomalies, and volatility.  
+- `class12-2022 cleaned (version 2).xlsb`: main Excel workbook with pivot summaries and profiling sheets.
+
+        - `pivot_baseflag_summary`: frequency vs coverage analysis of base flags.
+
+        - `pivot_integrity_summary`: logical consistency checks and flagged proportions. 
+
+        - `pivot_anomaly_summary`: anomaly profiling by type and coverage share.  
+
+        - `charts_volatility`: volatility measures across school types.  
+
+        - `profiling_*` sheets: deeper statistical profiling of base flags, anomalies, and volatility.  
+
 - `README.md` — project documentation and analytical context.  
 
 This repository demonstrates a reproducible pipeline for credibility analysis of CBSE Class 12 (2022) results. By systematically documenting base flags, integrity checks, anomalies, and volatility, it ensures that the dataset is not only analyzed but defended — transparent, reproducible, and credible to any audience.
