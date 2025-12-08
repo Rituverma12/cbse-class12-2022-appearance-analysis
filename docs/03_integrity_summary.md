@@ -2,36 +2,45 @@
 
 ## Purpose
 
-- The integrity summary validates logical consistency in the `fact_table` before analysis.
-- It ensures that appearance rates, registered counts, and missing values are flagged prior to credibility profiling.
-- These checks were unpivoted in Power Query into `Integrity_CheckType` and `Integrity_CheckResult` for dashboard pivots.
+- Validate logical consistency across appearance rates, registered counts, and missing values.
+- Integrity checks were migrated from worksheet formulas into Power Query for reproducibility, then unpivoted into the Data Model.
+- This sheet serves as a diagnostic pivot module feeding future dashboard panels.
 
 ## Setup
 
-- Derived directly from the `fact_table` diagnostic columns.
-- Each integrity formula was added in Excel for transparency and reproducibility.
-- Results were unpivoted in Power Query to feed into dashboard slicers and pivot tables.
-- Slicers included: `Region`, `School Type`, and `Integrity_CheckResult` (FLAG vs OK).
+- Checks engineered in Power Query, producing two fields:
+  - Integrity_CheckType (RateCheck, RegisteredCheck, MissingCheck)
+  - Integrity_CheckResult (OK, FLAG)
+- Pivot is built over the Data Model with slicers:
+  - Region
+  - School Type
+  - Integrity_CheckResult
+- Measures exposed:
+  - FlagCount
+  - TotalCount
+  - PercentFlagged = DIVIDE(FlagCount, TotalCount)
 
-## Integrity Checks
+## Integrity Checks (Power Query logic)
 
 ### Rate Check
 
-    = IF(OR([@[Appearance Rate]]<0, [@[Appearance Rate]]>1), "FLAG", "OK")
+    = if [Appearance Rate] = null then "OK" else if [Appearance Rate] < 0 or [Appearance Rate] > 1 then "FLAG" else "OK"
 
 - **Purpose:** Ensures appearance rates fall withing logic bounds (0-1).
 
 ### Registered Check
 
-    = IF([@Appeared]>[@Registered], "FLAG", "OK")
+    = if [Registered] = null or [Appeared] = null then "FLAG" else if [Appeared] > [Registered] then "FLAG" else "OK"
 
 - **Purpose:** Prevents cases where appeared students exceed registered students.
 
 ### Missing Check
 
-    = IF(OR(ISBLANK([@Registered]), ISBLANK([@Appeared]), [@Registered]=0, [@Appeared]=0), "FLAG", "OK")
+    = if [Registered] = null or [Appeared] = null then "FLAG" else if [Registered] = 0 or [Appeared] = 0 then "FLAG" else "OK"
 
 - **Purpose:** Flags incomplete or invalid records before analysis.
+
+> These formulas were first implemented in Excel. Now resides in Power Query for transparency and automatic recalculation on refresh.
 
 ## Pivot & Charts
 
@@ -73,11 +82,15 @@
 
   - Drill-through option to inspect flagged rows by slicer selection.
 
+> All visuals now source from the unified Data Model, ensuring slicer consistency across dashboard panels.
+
 - Analytical Role:
 
-  - Provides a baseline credibility filter before anomaly and volatility analysis.
+  - Quantifies integrity failures and isolates patterns via slicers.
 
-  - Highlights structural patterns in integrity failures (e.g., concentrated missing data in specific school types).
+  - Serves as a baseline credibility filter prior to anomaly and volatility analysis.
+  
+  - Ensures the dataset is audit-ready before profiling.
 
 ## Analytical Notes
 
@@ -89,12 +102,10 @@
 
 - Together, this stage ensures the dataset is audit‑ready before anomaly profiling.
 
+- Integrity checks were migrated from Excel into Power Query, making them reproducible and independent of worksheet formulas.
+
 ## Pipeline Context
 
-- This integrity summary corresponds to the validation stage of the data analysis pipeline.
-
-- Fact_table → enriched with diagnostic flags.
-
-- Integrity checks → unpivoted for pivots and dashboard visuals.
-
-- Enables downstream credibility profiling and anomaly detection.
+- Integrity summary corresponds to the validation stage of the pipeline.  
+- Checks were originally engineered in fact_table but are now migrated into Power Query and unpivoted into the Data Model.  
+- Enables downstream credibility profiling and anomaly detection with slicer-aware pivots.
