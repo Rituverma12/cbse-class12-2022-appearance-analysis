@@ -9,7 +9,7 @@ To reshape the raw CBSE Class 12 2022 dataset into a structured format suitable 
   - Imported `class12-2022 raw_dataset.csv.`
   - Promoted headers and set data types.
   - Renamed `Type` column -> `Region` for clarity and consistency.
-  ![Power Query Editor Preview](images\2025-12-08.png)
+  ![Power Query Editor Preview](cbse-class12-2022-appearance-analysis/images/2025-12-08.png)
 
 - **Unpivot School Type**
   - Selected columns from `CSTA` to `KV`.
