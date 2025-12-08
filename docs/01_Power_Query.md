@@ -11,7 +11,7 @@ To reshape the raw CBSE Class 12 2022 dataset into a structured format suitable 
   - Renamed `Type` column -> `Region` for clarity and consistency.
   - Raw dataset loaded into Power Query Editor with headers promoted and the data types applied.
   
-  ![Power Query Editor Preview](../images\PowerQueryEditorPreview.png)
+  ![Power Query Editor Preview](../images/PowerQueryEditorPreview.png)
 
 - **Unpivot School Type**
   - Selected columns from `CSTA` to `KV`.
@@ -20,11 +20,11 @@ To reshape the raw CBSE Class 12 2022 dataset into a structured format suitable 
     - `Value` -> holds registered/appeared counts.
   - Wide format with CTSA, GOVT, GOVT AIDED, INDEPENDENT, JNV, KV as separate columns.
 
-  ![Wide Format of School Types](../images\SeparateFormatSchoolTypes.png)
+  ![Wide Format of School Types](../images/SeparateFormatSchoolTypes.png)
 
   - Long format with `Attribute` and `Value`, later renamed `Attribute` to `School Type` and pivoted `Value` to `Regd.` and `Appd.`.
 
-  ![Long Format of School Types](../images\LongFormSchoolTypes.png)
+  ![Long Format of School Types](../images/LongFormSchoolTypes.png)
 
 - **Pivot Status**
   - Pivoted `Value` column into two fields
