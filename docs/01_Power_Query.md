@@ -9,17 +9,25 @@ To reshape the raw CBSE Class 12 2022 dataset into a structured format suitable 
   - Imported `class12-2022 raw_dataset.csv.`
   - Promoted headers and set data types.
   - Renamed `Type` column -> `Region` for clarity and consistency.
+  - Raw dataset loaded into Power Query Editor with headers promoted and the data types applied.
   
- ![Power Query Editor Preview](../images/2025-12-08.png)
+  ![Power Query Editor Preview](../images\PowerQueryEditorPreview.png)
 
 - **Unpivot School Type**
   - Selected columns from `CSTA` to `KV`.
   - Applied **Unpivot Columns**, resulting in:
     - `Attribute` -> renamed to `School Type`.
     - `Value` -> holds registered/appeared counts.
+  - Wide format with CTSA, GOVT, GOVT AIDED, INDEPENDENT, JNV, KV as separate columns.
+
+  ![Wide Format of School Types](../images\SeparateFormatSchoolTypes.png)
+
+  - Long format with `Attribute` and `Value`, later renamed `Attribute` to `School Type` and pivoted `Value` to `Regd.` and `Appd.`.
+
+  ![Long Format of School Types](../images\LongFormSchoolTypes.png)
 
 - **Pivot Status**
-  - Pivoted `Status` column into two fields
+  - Pivoted `Value` column into two fields
     - `Regd.` -> later renamed `Registered`.
     - `Appd.` -> later named `Appeared`.
 
@@ -69,6 +77,8 @@ To ensure reproducibility and element dependency on worksheet formulas, the foll
 
 These columns are now part of the unified Data Model (`Table1_14 2`) and are used across all dashboard pivots and slicers.
 
+Diagnostic flags migrated into Power Query as custom columns for reproducibility.
+
 ## **Integrity Check Reshaping (Later Step)**
 
 After diagnostic columns were added in Excel(`Integrity_RateCheck`, `Integrity_RegisteredCheck`, `Integrity_MissingCheck`), a separate Power Query step was used to:
@@ -98,6 +108,8 @@ After diagnostic columns were added in Excel(`Integrity_RateCheck`, `Integrity_R
 - Final query output renamed -> `class12-2022 result`. (Hidden later for convenience.)
 
 - Loaded into Excel as the staging query (`fact_table`). This table is no longer used for pivot analysis. All dashboards now source from the unified Data Model.
+
+![Final Query result in the Data Model.](../images/DataModelQueryVisual.png)
 
 ## **Reproducibility Commitment**
   
