@@ -1,98 +1,148 @@
-# CBSE Class 12 (2022) — Data Credibility Analysis
+# CBSE Class 12 (2022) — Attendance, Credibility & Risk Analysis
 
-## Overview
+## Project Overview
 
-- This repository documents a reproducible pipeline for analyzing the credibility of CBSE Class 12 (2022) results.
+This project analyzes Class 12 board examination attendance data (2022) across regions and school types, with a strong focus on
 
-- The project consolidates multiple diagnostic layers — base flags, integrity checks, anomaly profiling, and volatility analysis — into pivot‑driven summaries.
+- Data credibility
+- Coverage-weighted interpretation
+- Risk & anomaly detection
+- Transparent, reproducible Excel modeling
 
-- Each stage is designed to make data quality transparent, highlight risks, and provide slicer‑aware visuals that withstand scrutiny.
+## Objectives
 
-## Purpose
+- Measure overall appearance rates.
+- Identify high-impact regions and school types.
+- Detect low-attendance risk segments.
+- Handle small-base and structural zero cases responsibly
+- Demonstrate an industry-grade Excel analytics workflow
 
-- Ensure the dataset is **audit‑ready** before interpretation or reporting.
+## Workbook Architecture
 
-- Validate logical consistency (registered vs appeared counts, rate bounds, missing values).
+- `01_DATA_MODEL_raw_wide`: Raw source (unchanged)
+- `02_FACT_APPEARANCE (VIEW)`: Canonical fact table (Power Query)
+- `03_DATA_QUALITY_LOG (VIEW)`: Integrity audit log
+- `04_CREDIBILITY`: Base stability & coverage weight
+- `05_ANALYSIS`: Anomalies & risk patterns
+- `06_VOLATILITY`: Stability & dispersion analysis
+- `07_DASHBOARD`: Executive summary
+- `99_NOTES`: Assumptions, thresholds, methodology
 
-- Profile anomalies and unusual patterns that may distort credibility.
+### Design Principle
 
-- Measure volatility across school types and regions to detect instability.
+- Power Query: row-level logic
+- Power Pivot: aggregation & measures
+- Excel sheets: interpretation & communication
 
-- Provide reviewers with clear, interactive summaries that can be filtered by region and school type.
+## Data Preparation & Modeling
 
-## Workflow
+- Raw data normalized from wide to long format
+- Separate Registered vs Appeared counts
+- Derived metrics:
 
-1. **BaseFlag Summary(Doc. in progress)**  
+  - `Appearance rate`
+  - `No-show rate`
+  - `Base status`
+  - `Base flag`
+  - `Anomaly flag`
+  - `Risk buckets`
 
-   - Categorizes rows into ABSENT_BASE, SMALL_BASE, and VALID_BASE.  
-   - Distinguishes between row frequency and statistical weight (coverage share).  
-   - Surfaces the dominance of VALID_BASE and the zero‑weight nature of ABSENT_BASE.  
+All transformations are handled only in Power Query to ensure reproducibility.
 
-2. **Integrity Summary**  
+## Data Quality & Integrity
 
-   - Validates logical consistency: appearance rates, registered counts, and missing values.  
-   - Quantifies the proportion of flagged records and isolates structural risks.  
-   - Provides a baseline credibility filter before anomaly detection.  
+A dedicated audit log (03_DATA_QUALITY_LOG) validates:
 
-3. **Anomaly Summary(Doc. in progress)**  
+- Missing values
+- Rate logic consistency
+- Structural zeros
 
-   - Profiles unusual patterns such as LOW_RATE or SUSPICIOUS_PERFECTION.  
-   - Measures prevalence and coverage impact of anomalies.  
-   - Highlights whether anomalies are marginal or concentrated in specific regions or school types.  
+Key result:
 
-4. **Volatility Summary(Doc. in progress)**  
-   - Examines fluctuations in appearance rates across school types.  
-   - Identifies instability that may signal credibility concerns.  
-   - Provides statistical measures (range, standard deviation) for volatility.  
+- 0 integrity failures
+- 22 structural zeros, correctly isolated and excluded from analysis
 
-5. **Dashboard (Planned)**  
-   - Unifies all diagnostic panels into a single credibility dashboard.  
-   - Presents KPIs, charts, and interpretation blocks in one audit‑ready view.
+## Credibility & Coverage Weighting
 
-## Tools & Skills Used
+This analysis distinguishes frequency vs impact
 
-- **Excel (`PivotTables`, `PivotCharts`, `Slicers`)** — interactive summaries of base flags, integrity checks, anomalies, and volatility.
+- 65 valid-base segments
+- 99.96% usable coverage
+- Small-base segments are prevented from distorting conclusions.
 
-- **Power Query** — migrated diagnostic formulas into reproducible query logic; unpivoted checks into the Data Model. 
+Example: Seven "100%" appearance rate cases exist — but together they account for < 0.03 of total registerations.
 
-- **Data Model & DAX Measures** — created measures such as `FlagCount`, `TotalCount`, `PercentFlagged`, `Coverage Share` for slicer‑aware KPIs.  
+![Credibility Overview](images/credibility.jpg)
 
-- **Visualization** — stacked column charts, dual‑axis charts, pie charts, and heatmaps to contrast frequency vs weight and highlight integrity risks.
+## Anomaly & Risk Analysis
 
-- **Documentation (Markdown)** — README and sheet‑level `.md` files explaining purpose, setup, and analytical role of each pivot.  
+Segments are classified as:
 
-## Project Progress
+- `NORMAL`
+- `LOW_RATE`
+- `SUSPICIOUS_PERFECTION`
+- `ABSENT`
 
-- ✅ BaseFlag Summary complete  
-- ✅ Integrity Summary complete  
-- ✅ Anomaly Summary drafted  
-- ✅ Volatility pivots created  
-- 🔜 Dashboard assembly (Credibility Dashboard panel)  
+![Anomaly Aanlysis](images/analysis.jpg)
 
-## Analytical Role
+### Key findings
 
-- **Transparency:** Every pivot and chart is slicer‑aware, ensuring reviewers can filter by region and school type.
+- Normal segments dominate system behavior
+- Low-rate risk is rare but high-impact
+- Perfect attendance mostly occurs on small bases, requiring caution
 
-- **Credibility:** Each stage enforces a different dimension of data quality — from logical consistency to anomaly detection.
+## Volatility Analysis
 
-- **Audit‑readiness:** KPIs and interpretation blocks make findings clear to non‑technical audiences.
+- Average appearance rate by school type
+- Standard deviation highlights stability vs variability
+- Identifies school types where performance is consistent vs fragile
 
-- **Reproducibility:** All logic is migrated into the Data Model, avoiding hidden worksheet formulas.
+## Executive Dashboard
 
-## Repository Contents
+The dashboard summarizes:
 
-- `class12-2022 cleaned (version 2).xlsb`: main Excel workbook with pivot summaries and profiling sheets.
+- Usable Coverage Share
+- Integrity Score
+- Total Anomalous Coverage
+- Structural Zeros
 
-        - `pivot_baseflag_summary`: frequency vs coverage analysis of base flags.
+![Dashboard](images/dashboard.jpg)
 
-        - `pivot_integrity_summary`: logical consistency checks and flagged proportions. 
+All visuals are slicer-driven and coverage-aware
 
-        - `pivot_anomaly_summary`: anomaly profiling by type and coverage share.  
+## Methodology & Thresholds
 
-        - `charts_volatility`: volatility measures across school types.  
+All thresholds are explicitly justified and documented in 99_NOTES.
 
-        - `profiling_*` sheets: deeper statistical profiling of base flags, anomalies, and volatility.  
+### SMALL_BASE threshold = 100
 
-- `README.md` — project documentation and analytical context.  
+Based on:
 
-This repository demonstrates a reproducible pipeline for credibility analysis of CBSE Class 12 (2022) results. By systematically documenting base flags, integrity checks, anomalies, and volatility, it ensures that the dataset is not only analyzed but defended — transparent, reproducible, and credible to any audience.
+- Distribution of non-zero bases
+- Percentiles and concentration below 100
+
+### LOW_RATE threshold = 0.98
+
+Based on:
+
+- Empirical appearance-rate distribution
+- Natural breakpoints where risk emerges
+
+No arbitrary thresholds used.
+
+## Tools & Skills Demonstrated
+
+- Excel (Advanced)
+- Power Query (M)
+- Power Pivot (DAX)
+- Data modeling
+- Integrity auditing
+- Analytical storytelling
+- Documentation & reproducibility
+
+## Key Takeaways
+
+- Coverage-weighted thinking is essential for public-scale data
+- Small perfect segments should not dominate narratives
+- A clean data model is as important as final metrices
+- Excel, when structured correctly, can support serious analytics.
